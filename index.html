@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Political Ideology & Human Nature Matrix</title>
+    <title>Personal EMA Tracker</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -12,1232 +13,700 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
-            padding: 40px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
             line-height: 1.6;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 800px;
             margin: 0 auto;
-            background: white;
-            padding: 60px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
-        .document-title {
+        .header {
             text-align: center;
-            font-size: 36px;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #a8d5ba 0%, #7db89c 100%);
             color: white;
-            padding: 40px;
-            border-radius: 30px;
-            font-weight: 600;
-        }
-
-        .subtitle {
-            text-align: center;
-            font-style: italic;
-            color: #666;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .main-point {
-            background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%);
-            padding: 30px;
-            border-radius: 25px;
-            margin: 40px 0 30px 0;
-        }
-
-        .main-point h2 {
-            font-size: 22px;
-            color: #2e7d32;
-            margin-bottom: 0;
-        }
-
-        .sub-section {
-            background: #e8f5e9;
-            padding: 25px;
-            border-radius: 20px;
-            margin: 30px 0;
-        }
-
-        .sub-section h3 {
-            font-size: 20px;
-            color: #388e3c;
-            margin-bottom: 15px;
-        }
-
-        .content {
-            margin: 20px 0;
-        }
-
-        .bullet {
-            margin: 15px 0 15px 20px;
-            color: #333;
-        }
-
-        .bullet::before {
-            content: "●";
-            color: #66bb6a;
-            font-weight: bold;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
-        }
-
-        .sub-bullet {
-            margin: 10px 0 10px 40px;
-            color: #555;
-            font-size: 15px;
-        }
-
-        .sub-bullet::before {
-            content: "○";
-            color: #81c784;
-            display: inline-block;
-            width: 1em;
-            margin-left: -1em;
-        }
-
-        .diagram-container {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            padding: 50px;
-            border-radius: 20px;
-            margin: 40px 0;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .matrix-wrapper {
-            max-width: 900px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .axis-labels {
-            display: flex;
-            justify-content: center;
-            gap: 40px;
             margin-bottom: 30px;
         }
 
-        .axis-label-horizontal {
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .matrix-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            position: relative;
-            margin-top: 30px;
-        }
-
-        .axis-label-vertical {
-            position: absolute;
-            left: -80px;
-            top: 50%;
-            transform: translateY(-50%) rotate(-90deg);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px 40px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 14px;
-            white-space: nowrap;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .quadrant-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            position: relative;
-        }
-
-        .row-label {
-            position: absolute;
-            left: -70px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
-            color: white;
-            padding: 12px 25px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 13px;
-            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
-            white-space: nowrap;
-        }
-
-        .quadrant {
-            background: white;
-            border-radius: 20px;
-            padding: 35px 25px;
-            min-height: 280px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 20px;
-            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .quadrant::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 6px;
-            transition: height 0.4s ease;
-        }
-
-        .quadrant:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
-        }
-
-        .quadrant:hover::before {
-            height: 100%;
-            opacity: 0.08;
-        }
-
-        .q1 {
-            border: 3px solid #43e97b;
-        }
-
-        .q1::before {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-
-        .q2 {
-            border: 3px solid #f093fb;
-        }
-
-        .q2::before {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .q3 {
-            border: 3px solid #4facfe;
-        }
-
-        .q3::before {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .q4 {
-            border: 3px solid #fa709a;
-        }
-
-        .q4::before {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .quadrant-number {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 16px;
-            color: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .q1 .quadrant-number {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-
-        .q2 .quadrant-number {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .q3 .quadrant-number {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .q4 .quadrant-number {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .quadrant-badge {
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: white;
-        }
-
-        .q1 .quadrant-badge {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        }
-
-        .q2 .quadrant-badge {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-
-        .q3 .quadrant-badge {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .q4 .quadrant-badge {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .quadrant-title {
-            font-size: 20px;
-            font-weight: bold;
-            color: #2c3e50;
-            text-align: center;
-            line-height: 1.3;
-            margin: 10px 0;
-        }
-
-        .quadrant-items {
-            font-size: 14px;
-            color: #555;
-            text-align: center;
-            line-height: 2;
-        }
-
-        .quadrant-item {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 5px 0;
-        }
-
-        .quadrant-item::before {
-            content: '●';
-            font-size: 8px;
-            color: #999;
-        }
-
-        .dialectical-arrows {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-            margin: 20px 0;
-            flex-wrap: wrap;
-        }
-
-        .concept-box {
-            background: white;
-            border: 3px solid #66bb6a;
-            border-radius: 15px;
-            padding: 20px 30px;
-            font-weight: bold;
-            color: #2e7d32;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            min-width: 150px;
-        }
-
-        .arrow {
-            font-size: 32px;
-            color: #66bb6a;
-            font-weight: bold;
-        }
-
-        .example-box {
-            background: #fff9c4;
-            border-left: 4px solid #fbc02d;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-        }
-
-        .example-box strong {
-            color: #f57f17;
-            display: block;
+        .header h1 {
+            font-size: 2.5rem;
             margin-bottom: 10px;
-        }
-
-        .definition-box {
-            background: #e3f2fd;
-            border-left: 4px solid #1976d2;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-        }
-
-        .definition-box strong {
-            color: #1976d2;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .quote-box {
-            background: #f3e5f5;
-            border-left: 4px solid #8e24aa;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-            font-style: italic;
-        }
-
-        .warning-box {
-            background: #ffebee;
-            border-left: 4px solid #e53935;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-        }
-
-        .warning-box strong {
-            color: #c62828;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        .success-box {
-            background: #e8f5e9;
-            border-left: 4px solid #43a047;
-            padding: 20px;
-            margin: 20px 0;
-            border-radius: 8px;
-        }
-
-        .success-box strong {
-            color: #2e7d32;
-            display: block;
-            margin-bottom: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-            background: white;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        th {
-            background: #388e3c;
-            color: white;
-            padding: 15px;
-            text-align: left;
             font-weight: 600;
         }
 
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .metric-group {
+            margin-bottom: 25px;
+        }
+
+        .metric-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
             color: #333;
+            font-weight: 500;
         }
 
-        tr:nth-child(even) {
-            background: #f5f5f5;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        .classic-matrix {
-            max-width: 800px;
-            margin: 40px auto;
-            position: relative;
-        }
-
-        .classic-matrix-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: 1fr 1fr;
-            gap: 3px;
-            background: #2c3e50;
-            padding: 3px;
-            border-radius: 15px;
-            min-height: 500px;
-        }
-
-        .classic-quadrant {
-            padding: 35px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+        .metric-value {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            min-width: 40px;
             text-align: center;
-            position: relative;
         }
 
-        .classic-q1 {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            border-radius: 12px 0 0 0;
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
         }
 
-        .classic-q2 {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            border-radius: 0 12px 0 0;
-        }
-
-        .classic-q3 {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 0 0 0 12px;
-        }
-
-        .classic-q4 {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            border-radius: 0 0 12px 0;
-        }
-
-        .classic-quadrant-label {
-            font-size: 11px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: rgba(255,255,255,0.9);
-            background: rgba(0,0,0,0.2);
-            padding: 6px 15px;
-            border-radius: 20px;
-        }
-
-        .classic-quadrant-number {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            width: 40px;
-            height: 40px;
-            background: rgba(255,255,255,0.3);
-            color: white;
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .scale-labels {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
-            backdrop-filter: blur(10px);
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
         }
 
-        .classic-quadrant-title {
-            font-size: 22px;
-            font-weight: bold;
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            line-height: 1.3;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .classic-quadrant-list {
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            font-size: 14px;
-            line-height: 2;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
         }
 
-        .classic-quadrant-item {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 12px;
-            border-radius: 15px;
-            margin: 4px 0;
-            backdrop-filter: blur(5px);
+        .tab-content {
+            display: none;
         }
 
-        .matrix-axis-label {
-            position: absolute;
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 14px;
-            background: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        .tab-content.active {
+            display: block;
         }
 
-        .axis-top {
-            top: -40px;
-            left: 25%;
-            transform: translateX(-50%);
-        }
-
-        .axis-top-right {
-            top: -40px;
-            right: 25%;
-            transform: translateX(50%);
-        }
-
-        .axis-left {
-            left: -120px;
-            top: 25%;
-            transform: translateY(-50%);
-        }
-
-        .axis-bottom-left {
-            left: -120px;
-            bottom: 25%;
-            transform: translateY(50%);
-        }
-
-        @media (max-width: 768px) {
-            .classic-matrix-container {
-                min-height: 400px;
-                gap: 2px;
-            }
-
-            .classic-quadrant {
-                padding: 20px;
-            }
-
-            .classic-quadrant-title {
-                font-size: 16px;
-            }
-
-            .classic-quadrant-list {
-                font-size: 12px;
-            }
-
-            .matrix-axis-label {
-                font-size: 11px;
-                padding: 8px 12px;
-            }
-
-            .axis-left, .axis-bottom-left {
-                left: -90px;
-            }
-        }
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px 0;
-            border-left: 5px solid #667eea;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-
-        .synthesis-box h4 {
-            color: #667eea;
+        .entry {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
             margin-bottom: 15px;
-            font-size: 18px;
+            border-left: 4px solid #667eea;
         }
 
-        .synthesis-box p {
-            color: #555;
-            line-height: 1.8;
-            margin: 8px 0;
-        }
-
-        .relation-arrow {
-            font-size: 24px;
+        .entry-time {
             color: #667eea;
-            margin: 0 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
         }
 
-        .two-column-grid {
+        .entry-metrics {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin: 20px 0;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
         }
 
-        .column-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 25px;
-            border-radius: 15px;
-            border: 2px solid #dee2e6;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
+        .entry-metric {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
         }
 
-        .column-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        .entry-metric-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 5px;
         }
 
-        .column-card h4 {
-            color: #2e7d32;
-            margin-bottom: 15px;
-            font-size: 18px;
+        .entry-metric-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 30px 20px;
+        .entry-notes {
+            color: #555;
+            font-style: italic;
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
             }
-            
-            .document-title {
-                font-size: 28px;
-                padding: 30px 20px;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
-            
-            .diagram-container {
-                padding: 30px 20px;
-            }
-            
-            .classic-matrix-container {
-                min-height: 400px;
-                gap: 2px;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2rem;
             }
 
-            .classic-quadrant {
+            .card {
                 padding: 20px;
             }
 
-            .classic-quadrant-title {
-                font-size: 16px;
-            }
-
-            .classic-quadrant-list {
-                font-size: 12px;
-            }
-
-            .matrix-axis-label {
-                font-size: 11px;
-                padding: 8px 12px;
-            }
-
-            .axis-left, .axis-bottom-left {
-                left: -90px;
-            }
-            
-            .two-column-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .relation-arrow {
-                transform: rotate(90deg);
-                margin: 15px 0;
+            .tabs {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="document-title">
-            Political Ideology & Human Nature Matrix
-        </div>
-        
-        <div class="subtitle">
-            Challenging the Conventional Wisdom About Left-Right Politics and Views of Human Nature
+        <div class="header">
+            <h1>📊 Personal EMA Tracker</h1>
+            <p>Track your mental health and productivity</p>
         </div>
 
-        <div class="content">
-            <p style="text-align: center; color: #666; margin-bottom: 40px;">
-                This framework reveals that political ideology and views of human nature don't follow simple patterns. The unconventional quadrants—left-wing pessimists and right-wing optimists—offer crucial insights often overlooked in political analysis.
-            </p>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('log')">Log Entry</button>
+            <button class="tab" onclick="switchTab('history')">History</button>
+            <button class="tab" onclick="switchTab('insights')">Insights</button>
         </div>
 
-        <!-- MAIN POINT 1 -->
-        <div class="main-point">
-            <h2>Main Point 1: The Conventional Wisdom Is Incomplete</h2>
-        </div>
+        <!-- LOG ENTRY TAB -->
+        <div id="log-tab" class="tab-content active">
+            <div class="card">
+                <h2>How are you feeling right now?</h2>
 
-        <div class="sub-section">
-            <h3>Main Point 1.1: What Everyone Assumes</h3>
-            
-            <div class="content">
-                <div class="bullet"><strong>The Standard Story:</strong> Political discourse operates on an implicit assumption that left-wing politics correlates with optimism about human nature, while right-wing politics correlates with pessimism</div>
-                
-                <div class="sub-bullet">Left-wing belief in social progress implies faith in human improvement</div>
-                <div class="sub-bullet">Right-wing emphasis on law and order implies distrust of human behavior</div>
-                <div class="sub-bullet">Progressive education assumes children are naturally good and curious</div>
-                <div class="sub-bullet">Conservative criminal justice assumes humans need deterrence and punishment</div>
-            </div>
-
-            <div class="example-box">
-                <strong>Example: How This Shows Up in Politics</strong>
-                When progressives advocate for rehabilitation programs, they're assumed to believe in human goodness. When conservatives advocate for strict sentencing, they're assumed to believe humans are naturally selfish. Both assumptions are oversimplifications.
-            </div>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 1.2: The Lakoff Framework</h3>
-            
-            <div class="definition-box">
-                <strong>George Lakoff's "Moral Politics" Framework</strong>
-                Lakoff argues that political worldviews derive from unconscious family models: "Strict Father" (conservative) versus "Nurturant Parent" (liberal). These metaphors structure how people think about everything from taxation to foreign policy.
-            </div>
-
-            <table>
-                <tr>
-                    <th>Dimension</th>
-                    <th>Strict Father (Conservative)</th>
-                    <th>Nurturant Parent (Liberal)</th>
-                </tr>
-                <tr>
-                    <td><strong>View of Human Nature</strong></td>
-                    <td>Born undisciplined, must be made good through strict moral authority</td>
-                    <td>Born good, need nurturing to develop natural empathy</td>
-                </tr>
-                <tr>
-                    <td><strong>Role of Authority</strong></td>
-                    <td>Strong authority necessary to guide and discipline</td>
-                    <td>Support and empathy necessary to facilitate growth</td>
-                </tr>
-                <tr>
-                    <td><strong>Social Policy</strong></td>
-                    <td>Tough on crime, limited welfare, personal responsibility</td>
-                    <td>Rehabilitation, social safety nets, collective support</td>
-                </tr>
-            </table>
-
-            <div class="warning-box">
-                <strong>⚠️ Limitation of Lakoff's Model</strong>
-                While powerful for understanding conventional alignments, Lakoff's framework struggles to account for left-wing pessimists (Frankfurt School, critical theorists) and right-wing optimists (libertarians, anarcho-capitalists). These unconventional quadrants reveal the model is incomplete.
-            </div>
-        </div>
-
-        <!-- MAIN POINT 2 -->
-        <div class="main-point">
-            <h2>Main Point 2: The Four Quadrants Explained</h2>
-        </div>
-
-        <div class="classic-matrix">
-            <div class="matrix-axis-label axis-top">Optimistic View</div>
-            <div class="matrix-axis-label axis-top-right">Pessimistic View</div>
-            <div class="matrix-axis-label axis-left">Left-Wing</div>
-            <div class="matrix-axis-label axis-bottom-left">Right-Wing</div>
-
-            <div class="classic-matrix-container">
-                <div class="classic-quadrant classic-q1">
-                    <div class="classic-quadrant-number">Q1</div>
-                    <div class="classic-quadrant-label">Conventional</div>
-                    <div class="classic-quadrant-title">Optimistic<br>Progressives</div>
-                    <div class="classic-quadrant-list">
-                        <div class="classic-quadrant-item">Rousseau</div>
-                        <div class="classic-quadrant-item">Social Democrats</div>
-                        <div class="classic-quadrant-item">Nurturant Parent</div>
-                    </div>
+                <div id="success-message" style="display: none;" class="success-message">
+                    Entry saved successfully!
                 </div>
 
-                <div class="classic-quadrant classic-q2">
-                    <div class="classic-quadrant-number">Q2</div>
-                    <div class="classic-quadrant-label">Unconventional</div>
-                    <div class="classic-quadrant-title">Critical<br>Pessimists</div>
-                    <div class="classic-quadrant-list">
-                        <div class="classic-quadrant-item">Frankfurt School</div>
-                        <div class="classic-quadrant-item">Critical Theory</div>
-                        <div class="classic-quadrant-item">False Consciousness</div>
+                <form id="ema-form">
+                    <div class="metric-group">
+                        <div class="metric-label">
+                            <span>😊 Mood</span>
+                            <span class="metric-value" id="mood-value">5</span>
+                        </div>
+                        <input type="range" class="slider" id="mood" min="1" max="10" value="5">
+                        <div class="scale-labels">
+                            <span>Very Low</span>
+                            <span>Neutral</span>
+                            <span>Very High</span>
+                        </div>
                     </div>
+
+                    <div class="metric-group">
+                        <div class="metric-label">
+                            <span>😰 Anxiety</span>
+                            <span class="metric-value" id="anxiety-value">5</span>
+                        </div>
+                        <input type="range" class="slider" id="anxiety" min="1" max="10" value="5">
+                        <div class="scale-labels">
+                            <span>Very Calm</span>
+                            <span>Moderate</span>
+                            <span>Very Anxious</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-group">
+                        <div class="metric-label">
+                            <span>⚡ Energy</span>
+                            <span class="metric-value" id="energy-value">5</span>
+                        </div>
+                        <input type="range" class="slider" id="energy" min="1" max="10" value="5">
+                        <div class="scale-labels">
+                            <span>Exhausted</span>
+                            <span>Moderate</span>
+                            <span>Energized</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-group">
+                        <div class="metric-label">
+                            <span>🎯 Focus</span>
+                            <span class="metric-value" id="focus-value">5</span>
+                        </div>
+                        <input type="range" class="slider" id="focus" min="1" max="10" value="5">
+                        <div class="scale-labels">
+                            <span>Scattered</span>
+                            <span>Moderate</span>
+                            <span>Laser-Focused</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-group">
+                        <div class="metric-label">
+                            <span>💼 Productivity</span>
+                            <span class="metric-value" id="productivity-value">5</span>
+                        </div>
+                        <input type="range" class="slider" id="productivity" min="1" max="10" value="5">
+                        <div class="scale-labels">
+                            <span>Not Productive</span>
+                            <span>Moderate</span>
+                            <span>Very Productive</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-group">
+                        <label class="metric-label">
+                            <span>📝 Notes (optional)</span>
+                        </label>
+                        <textarea id="notes" placeholder="Any thoughts, context, or observations..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn">Save Entry</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="history-tab" class="tab-content">
+            <div class="card">
+                <h2>Your History</h2>
+                <div id="entries-container"></div>
+            </div>
+        </div>
+
+        <!-- INSIGHTS TAB -->
+        <div id="insights-tab" class="tab-content">
+            <div class="card">
+                <h2>Your Insights</h2>
+                <div id="stats-container" class="stats-grid"></div>
+                <div class="chart-container">
+                    <canvas id="trend-chart"></canvas>
                 </div>
-
-                <div class="classic-quadrant classic-q3">
-                    <div class="classic-quadrant-number">Q3</div>
-                    <div class="classic-quadrant-label">Unconventional</div>
-                    <div class="classic-quadrant-title">Optimistic<br>Libertarians</div>
-                    <div class="classic-quadrant-list">
-                        <div class="classic-quadrant-item">Hayek & Friedman</div>
-                        <div class="classic-quadrant-item">Anarcho-Capitalists</div>
-                        <div class="classic-quadrant-item">Free Markets</div>
-                    </div>
-                </div>
-
-                <div class="classic-quadrant classic-q4">
-                    <div class="classic-quadrant-number">Q4</div>
-                    <div class="classic-quadrant-label">Conventional</div>
-                    <div class="classic-quadrant-title">Pessimistic<br>Traditionalists</div>
-                    <div class="classic-quadrant-list">
-                        <div class="classic-quadrant-item">Hobbes</div>
-                        <div class="classic-quadrant-item">Conservatives</div>
-                        <div class="classic-quadrant-item">Strict Father</div>
-                    </div>
-                </div>
+                <button class="btn btn-secondary" onclick="exportData()">📥 Export All Data</button>
             </div>
         </div>
-
-        <div class="sub-section">
-            <h3>Main Point 2.1: Quadrant 1 — Conventional Left (Optimistic Progressives)</h3>
-            
-            <div class="definition-box">
-                <strong>Core Belief</strong>
-                Humans are naturally good, cooperative, and empathetic. Social problems arise from bad institutions, not bad human nature. Create the right conditions, and people will flourish.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Key Thinkers:</strong> Jean-Jacques Rousseau ("Man is born free and everywhere he is in chains"), John Dewey (progressive education), modern social democrats</div>
-                
-                <div class="bullet"><strong>Policy Implications:</strong></div>
-                <div class="sub-bullet">Universal social programs (people will use support responsibly)</div>
-                <div class="sub-bullet">Progressive education (facilitate natural development)</div>
-                <div class="sub-bullet">Rehabilitation over punishment (people can change)</div>
-                <div class="sub-bullet">Direct democracy and participation (trust in citizens)</div>
-            </div>
-
-            <div class="quote-box">
-                "Man is born free, and everywhere he is in chains." 
-                <div style="text-align: right; margin-top: 10px; font-style: normal;">— Jean-Jacques Rousseau</div>
-            </div>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 2.2: Quadrant 2 — Unconventional Left (Critical Pessimists)</h3>
-            
-            <div class="success-box">
-                <strong>✓ Key Insight</strong>
-                You can advocate for radical egalitarian change precisely BECAUSE you're pessimistic about human consciousness and behavior under existing conditions. This is not a contradiction—it's a strategic position.
-            </div>
-
-            <div class="definition-box">
-                <strong>Core Belief</strong>
-                Humans under capitalism are corrupted by false consciousness, alienation, and ideological manipulation. People cannot spontaneously see their true interests because the system shapes their very consciousness.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Frankfurt School Critical Theory:</strong> Theodor Adorno, Max Horkheimer, and Herbert Marcuse argued that capitalism created psychological domination beyond economic exploitation</div>
-                
-                <div class="sub-bullet">False Consciousness: Workers cannot see true interests because the system shapes consciousness itself</div>
-                <div class="sub-bullet">Culture Industry: Mass entertainment creates passive, manipulable subjects</div>
-                <div class="sub-bullet">One-Dimensional Man: Advanced industrial society eliminates critical thinking</div>
-            </div>
-
-            <div class="example-box">
-                <strong>Example: Herbert Marcuse's Analysis</strong>
-                Marcuse argued that workers in advanced capitalism identify with the system oppressing them through consumption and "false needs." True liberation requires radical consciousness transformation—you can't just appeal to people's existing values because those values are products of oppression.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Policy Implications:</strong></div>
-                <div class="sub-bullet">Consciousness-raising and critical education (awaken people from ideological slumber)</div>
-                <div class="sub-bullet">Skepticism about democratic participation when masses are manipulated by media</div>
-                <div class="sub-bullet">Critique of consumer culture as degrading human potential</div>
-                <div class="sub-bullet">Revolutionary transformation over gradual reform</div>
-            </div>
-
-            <div class="warning-box">
-                <strong>⚠️ Common Misunderstanding</strong>
-                Left-wing pessimists don't believe humans are inherently bad—they believe humans are trapped in systems that prevent clear thinking. The pessimism is conditional: about humans under capitalism, not about human potential in general.
-            </div>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 2.3: Quadrant 3 — Unconventional Right (Optimistic Libertarians)</h3>
-            
-            <div class="success-box">
-                <strong>✓ Key Insight</strong>
-                You can advocate for limited government and free markets precisely BECAUSE you trust human judgment, rationality, and capacity for voluntary cooperation. Small government isn't about cynicism—it's about faith in people.
-            </div>
-
-            <div class="definition-box">
-                <strong>Core Belief</strong>
-                Humans are rational, capable of making good decisions, and will cooperate voluntarily when free. Limited government is justified by TRUST in human capacity for self-organization, not by distrust.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Classical Liberalism:</strong> Adam Smith's "The Theory of Moral Sentiments" reveals that early free-market economics was grounded in optimism about human sympathy and natural fairness</div>
-                
-                <div class="bullet"><strong>Austrian Economics:</strong> F.A. Hayek and Ludwig von Mises argued that spontaneous order emerges from individual action</div>
-                <div class="sub-bullet">Free individuals making choices create better outcomes than central planning</div>
-                <div class="sub-bullet">Requires trust in human capacity for rational decision-making with dispersed information</div>
-                <div class="sub-bullet">Faith in emergent beneficial institutions without top-down design</div>
-            </div>
-
-            <div class="example-box">
-                <strong>Example: Hayek's "The Road to Serfdom"</strong>
-                Hayek argued that central planning fails because no authority can possess the knowledge distributed across society. Free markets work because they aggregate dispersed information through price signals. This argument only works if you believe humans are capable of coordinating effectively through voluntary exchange.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Policy Implications:</strong></div>
-                <div class="sub-bullet">Minimal regulation (people will make informed choices)</div>
-                <div class="sub-bullet">School choice (parents know their children's needs better than experts)</div>
-                <div class="sub-bullet">Free markets (emergent order superior to government planning)</div>
-                <div class="sub-bullet">Decriminalization (trust individual judgment about risk)</div>
-            </div>
-
-            <div class="quote-box">
-                "The curious task of economics is to demonstrate to men how little they really know about what they imagine they can design." 
-                <div style="text-align: right; margin-top: 10px; font-style: normal;">— F.A. Hayek</div>
-            </div>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 2.4: Quadrant 4 — Conventional Right (Pessimistic Traditionalists)</h3>
-            
-            <div class="definition-box">
-                <strong>Core Belief</strong>
-                Humans are flawed, selfish, and need strong institutions to channel behavior productively. Without structure, authority, and tradition, society degenerates into chaos.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Key Thinkers:</strong> Thomas Hobbes (life in state of nature is "nasty, brutish, and short"), Edmund Burke (tradition guides us better than abstract reason), social conservatives concerned with moral decay</div>
-                
-                <div class="bullet"><strong>Policy Implications:</strong></div>
-                <div class="sub-bullet">Strong law enforcement (deterrence is necessary)</div>
-                <div class="sub-bullet">Traditional moral education (shape character from the outside)</div>
-                <div class="sub-bullet">Authority and hierarchy as social necessities</div>
-                <div class="sub-bullet">Skepticism about human perfectibility</div>
-            </div>
-
-            <div class="quote-box">
-                "During the time men live without a common power to keep them all in awe, they are in that condition which is called war; and such a war as is of every man against every man." 
-                <div style="text-align: right; margin-top: 10px; font-style: normal;">— Thomas Hobbes, Leviathan</div>
-            </div>
-        </div>
-
-        <!-- MAIN POINT 3 -->
-        <div class="main-point">
-            <h2>Main Point 3: Cross-Quadrant Dynamics and Strategic Implications</h2>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 3.1: Internal Left Tensions (Q1 vs Q2)</h3>
-            
-            <div class="content">
-                <p style="margin-bottom: 15px;">Left-wing optimists and left-wing pessimists often find themselves in conflict despite sharing economic goals:</p>
-                
-                <div class="two-column-grid">
-                    <div class="column-card">
-                        <h4>Q1: Optimistic Left Approach</h4>
-                        <div class="bullet">Appeal to people's better nature and existing values</div>
-                        <div class="bullet">Inclusive dialogue and empathy</div>
-                        <div class="bullet">Celebrate popular culture</div>
-                        <div class="bullet">Facilitate natural development in education</div>
-                    </div>
-                    <div class="column-card">
-                        <h4>Q2: Pessimistic Left Approach</h4>
-                        <div class="bullet">Awaken people from false consciousness</div>
-                        <div class="bullet">Confrontational consciousness-raising</div>
-                        <div class="bullet">Critique popular culture as capitalist manipulation</div>
-                        <div class="bullet">Critical pedagogy to counter hegemonic ideology</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="example-box">
-                <strong>Example: Occupy Wall Street Internal Debates</strong>
-                Q1 activists wanted to welcome everyone and build broad coalitions. Q2 activists worried about co-optation and insisted on ideological clarity first. Both were pursuing left-wing goals but with fundamentally different assumptions about human consciousness.
-            </div>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 3.2: Internal Right Tensions (Q3 vs Q4)</h3>
-            
-            <div class="content">
-                <p style="margin-bottom: 15px;">Right-wing optimists and right-wing pessimists clash despite both opposing big government:</p>
-                
-                <div class="two-column-grid">
-                    <div class="column-card">
-                        <h4>Q3: Optimistic Right Approach</h4>
-                        <div class="bullet">Trust individual moral judgment</div>
-                        <div class="bullet">Personal liberty over moral legislation</div>
-                        <div class="bullet">Pure market freedom</div>
-                        <div class="bullet">Legalize drugs (individual choice)</div>
-                    </div>
-                    <div class="column-card">
-                        <h4>Q4: Pessimistic Right Approach</h4>
-                        <div class="bullet">Need for traditional moral authority</div>
-                        <div class="bullet">Legislate morality to prevent decay</div>
-                        <div class="bullet">Markets embedded in moral community</div>
-                        <div class="bullet">Prohibit drugs (prevent social breakdown)</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="warning-box">
-                <strong>⚠️ Why This Matters</strong>
-                These tensions explain why libertarians and social conservatives struggle to form stable coalitions despite both identifying as "right-wing." They want small government for opposite reasons: trust vs. distrust of human nature.
-            </div>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 3.3: Unexpected Diagonal Alliances</h3>
-            
-            <div class="success-box">
-                <strong>✓ Strategic Opportunity</strong>
-                The most interesting political possibilities emerge from unexpected diagonal connections across the matrix, not from conventional left-right coalitions.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Q2 + Q4 Alliance (Pessimist Coalition):</strong> Left-wing pessimists and right-wing pessimists might unite on:</div>
-                <div class="sub-bullet">Critiques of mass consumer culture as degrading</div>
-                <div class="sub-bullet">Concerns about technology and social media manipulation</div>
-                <div class="sub-bullet">Skepticism about simple democratic participation (masses are manipulated)</div>
-                <div class="sub-bullet">Need for education/formation rather than just liberation</div>
-
-                <div class="bullet"><strong>Q1 + Q3 Alliance (Optimist Coalition):</strong> Left-wing optimists and right-wing optimists might unite on:</div>
-                <div class="sub-bullet">Trust in decentralization and local decision-making</div>
-                <div class="sub-bullet">Opposition to paternalistic authority</div>
-                <div class="sub-bullet">Belief in emergent social solutions over top-down planning</div>
-                <div class="sub-bullet">Faith in human capacity for self-organization</div>
-            </div>
-
-            <div class="example-box">
-                <strong>Example: Left-Libertarian Alliances</strong>
-                Groups like the Rojava autonomous administration in Syria or participatory economics advocates combine left-wing economic goals (Q1) with libertarian trust in decentralization (Q3). They believe people can spontaneously organize egalitarian institutions without state hierarchy.
-            </div>
-        </div>
-
-        <!-- MAIN POINT 4 -->
-        <div class="main-point">
-            <h2>Main Point 4: Expanding the Lakoff Framework</h2>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 4.1: The Four Parent Models</h3>
-            
-            <div class="content">
-                <p style="margin-bottom: 20px;">To account for all four quadrants, we propose expanding Lakoff's framework with two additional models:</p>
-            </div>
-
-            <table>
-                <tr>
-                    <th>Model</th>
-                    <th>Quadrant</th>
-                    <th>View of Human Nature</th>
-                    <th>Key Metaphor</th>
-                </tr>
-                <tr>
-                    <td><strong>Nurturant Parent</strong> (Lakoff)</td>
-                    <td>Q1: Conventional Left</td>
-                    <td>Optimistic - naturally empathetic</td>
-                    <td>Children need support to develop natural goodness</td>
-                </tr>
-                <tr>
-                    <td><strong>Critical Parent</strong> (Our Extension)</td>
-                    <td>Q2: Unconventional Left</td>
-                    <td>Pessimistic - corrupted by systems</td>
-                    <td>Children need awakening from ideological manipulation</td>
-                </tr>
-                <tr>
-                    <td><strong>Trusting Mentor</strong> (Our Extension)</td>
-                    <td>Q3: Unconventional Right</td>
-                    <td>Optimistic - capable of self-direction</td>
-                    <td>Young adults flourish when given freedom and responsibility</td>
-                </tr>
-                <tr>
-                    <td><strong>Strict Father</strong> (Lakoff)</td>
-                    <td>Q4: Conventional Right</td>
-                    <td>Pessimistic - needs discipline</td>
-                    <td>Children need strong authority to become moral</td>
-                </tr>
-            </table>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 4.2: The Critical Parent Model (Q2)</h3>
-            
-            <div class="definition-box">
-                <strong>Critical Parent Model</strong>
-                Unlike the Nurturant Parent who trusts natural development, the Critical Parent sees children as susceptible to harmful ideologies. The parent's role is consciousness-raising: teaching children to question authority, recognize manipulation, and see through false consciousness.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Educational Philosophy:</strong> Paulo Freire's "Pedagogy of the Oppressed"—education must help students recognize and challenge oppressive structures</div>
-                
-                <div class="bullet"><strong>Parenting Approach:</strong></div>
-                <div class="sub-bullet">Critical media literacy (not just accept what you see)</div>
-                <div class="sub-bullet">Question everything (especially mainstream narratives)</div>
-                <div class="sub-bullet">Develop class consciousness and awareness of power structures</div>
-                <div class="sub-bullet">Protect children from capitalist manipulation (limit advertising exposure)</div>
-            </div>
-
-            <div class="example-box">
-                <strong>Example: Critical Parent in Action</strong>
-                A Critical Parent seeing their child watch advertisements doesn't just nurture them or discipline them—they teach them to analyze: "Who made this? What do they want you to think? What are they really selling?"
-            </div>
-        </div>
-
-        <div class="sub-section">
-            <h3>Main Point 4.3: The Trusting Mentor Model (Q3)</h3>
-            
-            <div class="definition-box">
-                <strong>Trusting Mentor Model</strong>
-                Unlike the Strict Father who demands obedience, the Trusting Mentor believes young people are capable of good judgment when given freedom. The mentor's role is to provide information and step back, trusting in individual capacity for rational decision-making.
-            </div>
-
-            <div class="content">
-                <div class="bullet"><strong>Educational Philosophy:</strong> Unschooling, self-directed learning—people learn best when pursuing their own interests with guidance available but not imposed</div>
-                
-                <div class="bullet"><strong>Parenting Approach:</strong></div>
-                <div class="sub-bullet">Treat teenagers as capable decision-makers</div>
-                <div class="sub-bullet">Provide information, then trust their choices</div>
-                <div class="sub-bullet">Natural consequences teach better than imposed punishment</div>
-                <div class="sub-bullet">Respect individual autonomy and judgment</div>
-            </div>
-
-            <div class="example-box">
-                <strong>Example: Trusting Mentor in Action</strong>
-                When a teenager wants to try something risky, the Trusting Mentor doesn't forbid it (Strict Father) or try to redirect to safer options (Nurturant Parent)—they discuss risks honestly and trust the young person to make an informed choice.
-            </div>
-        </div>
-
-        <!-- SUMMARY SECTION -->
-        <div style="margin-top: 60px;">
-            <div class="main-point">
-                <h2>Synthesis: The Complete Framework</h2>
-            </div>
-
-            <div class="diagram-container">
-                <h3 style="color: #2c3e50; margin-bottom: 30px;">How The Quadrants Relate</h3>
-                
-                <div style="background: white; border-radius: 20px; padding: 40px; margin: 20px 0;">
-                    <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
-                        <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px 30px; border-radius: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(67, 233, 123, 0.3);">Q1<br>NURTURANT<br>PARENT</div>
-                        <span class="relation-arrow">⟷</span>
-                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px 30px; border-radius: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);">Q2<br>CRITICAL<br>PARENT</div>
-                    </div>
-                    
-                    <p style="text-align: center; color: #666; margin: 25px 0; font-size: 15px;">Both pursue left-wing goals but disagree about human consciousness</p>
-                    
-                    <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; margin-top: 40px; margin-bottom: 30px;">
-                        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px 30px; border-radius: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);">Q3<br>TRUSTING<br>MENTOR</div>
-                        <span class="relation-arrow">⟷</span>
-                        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; padding: 20px 30px; border-radius: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(250, 112, 154, 0.3);">Q4<br>STRICT<br>FATHER</div>
-                    </div>
-                    
-                    <p style="text-align: center; color: #666; margin: 25px 0; font-size: 15px;">Both want limited welfare state but disagree about human nature</p>
-                </div>
-                
-                <div style="margin-top: 40px;">
-                    <div class="synthesis-box">
-                        <h4>🔄 Diagonal Tensions</h4>
-                        <p><strong>Q1 ⟷ Q4:</strong> The conventional left-right divide (Lakoff's original insight)</p>
-                        <p><strong>Q2 ⟷ Q3:</strong> Pessimists who see manipulation everywhere vs. optimists who trust emergence</p>
-                    </div>
-                    
-                    <div class="synthesis-box" style="border-left-color: #43e97b;">
-                        <h4>🤝 Unexpected Alliances</h4>
-                        <p><strong>Q1 + Q3 (Optimist Coalition):</strong> Trust in decentralization, belief in human capacity for self-organization</p>
-                        <p><strong>Q2 + Q4 (Pessimist Coalition):</strong> Critique of mass consumer culture, concerns about manipulation</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="success-box" style="margin-top: 40px;">
-                <strong>✓ Final Takeaways</strong>
-                <div class="bullet">Political ideology and views of human nature are orthogonal dimensions, not a simple correlation</div>
-                <div class="bullet">The unconventional quadrants (left-wing pessimists and right-wing optimists) are not anomalies—they represent coherent political positions</div>
-                <div class="bullet">Understanding these quadrants reveals:
-                    <div class="sub-bullet">Why left-wing movements split over strategy (consciousness-raising vs. inclusive organizing)</div>
-                    <div class="sub-bullet">Why right-wing movements split over social policy (liberty vs. authority)</div>
-                    <div class="sub-bullet">Unexpected alliance opportunities across the diagonal</div>
-                </div>
-                <div class="bullet">Political theory needs frameworks that can accommodate this complexity beyond simple left-right or authoritarian-libertarian axes</div>
-                <div class="bullet">Lakoff's family models work well but must be expanded with "Critical Parent" and "Trusting Mentor" to fully explain the political landscape</div>
-            </div>
-
-            <div style="margin-top: 40px; padding: 40px; background: linear-gradient(135deg, #c8e6c9 0%, #a5d6a7 100%); border-radius: 20px; text-align: center;">
-                <h3 style="color: #2e7d32; margin-bottom: 20px;">Why This Matters</h3>
-                <p style="color: #388e3c; font-size: 18px; line-height: 1.8;">
-                    Recognizing the full matrix helps us understand political movements more accurately, predict internal tensions, identify strategic opportunities, and avoid oversimplified narratives about left versus right. The unconventional quadrants aren't exceptions—they're essential pieces of the political landscape that reveal the deep diversity within both progressive and conservative thought.
-                </p>
-            </div>
-        </div>
-
     </div>
+
+    <script>
+        // Initialize app
+        let entries = JSON.parse(localStorage.getItem('emaEntries') || '[]');
+        let chart = null;
+
+        // Update slider values in real-time
+        document.querySelectorAll('.slider').forEach(slider => {
+            slider.addEventListener('input', (e) => {
+                document.getElementById(`${e.target.id}-value`).textContent = e.target.value;
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('ema-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const entry = {
+                timestamp: new Date().toISOString(),
+                mood: parseInt(document.getElementById('mood').value),
+                anxiety: parseInt(document.getElementById('anxiety').value),
+                energy: parseInt(document.getElementById('energy').value),
+                focus: parseInt(document.getElementById('focus').value),
+                productivity: parseInt(document.getElementById('productivity').value),
+                notes: document.getElementById('notes').value.trim()
+            };
+
+            entries.unshift(entry);
+            localStorage.setItem('emaEntries', JSON.stringify(entries));
+
+            // Show success message
+            const successMsg = document.getElementById('success-message');
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+
+            // Reset form
+            document.getElementById('ema-form').reset();
+            document.querySelectorAll('.metric-value').forEach(el => {
+                el.textContent = '5';
+            });
+
+            // Update other tabs
+            renderHistory();
+            renderInsights();
+        });
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-tab`).classList.add('active');
+
+            if (tab === 'history') renderHistory();
+            if (tab === 'insights') renderInsights();
+        }
+
+        // Render history
+        function renderHistory() {
+            const container = document.getElementById('entries-container');
+
+            if (entries.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        <p>No entries yet. Start logging your first entry!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = entries.map(entry => {
+                const date = new Date(entry.timestamp);
+                const formatted = date.toLocaleString('en-US', {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    hour12: true
+                });
+
+                return `
+                    <div class="entry">
+                        <div class="entry-time">${formatted}</div>
+                        <div class="entry-metrics">
+                            <div class="entry-metric">
+                                <div class="entry-metric-label">Mood</div>
+                                <div class="entry-metric-value">${entry.mood}</div>
+                            </div>
+                            <div class="entry-metric">
+                                <div class="entry-metric-label">Anxiety</div>
+                                <div class="entry-metric-value">${entry.anxiety}</div>
+                            </div>
+                            <div class="entry-metric">
+                                <div class="entry-metric-label">Energy</div>
+                                <div class="entry-metric-value">${entry.energy}</div>
+                            </div>
+                            <div class="entry-metric">
+                                <div class="entry-metric-label">Focus</div>
+                                <div class="entry-metric-value">${entry.focus}</div>
+                            </div>
+                            <div class="entry-metric">
+                                <div class="entry-metric-label">Productivity</div>
+                                <div class="entry-metric-value">${entry.productivity}</div>
+                            </div>
+                        </div>
+                        ${entry.notes ? `<div class="entry-notes">"${entry.notes}"</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render insights
+        function renderInsights() {
+            const statsContainer = document.getElementById('stats-container');
+
+            if (entries.length === 0) {
+                statsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        <p>No data to analyze yet. Start logging entries!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Calculate averages
+            const avg = (metric) => {
+                const sum = entries.reduce((acc, e) => acc + e[metric], 0);
+                return (sum / entries.length).toFixed(1);
+            };
+
+            statsContainer.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-value">${avg('mood')}</div>
+                    <div class="stat-label">Avg Mood</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avg('anxiety')}</div>
+                    <div class="stat-label">Avg Anxiety</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avg('energy')}</div>
+                    <div class="stat-label">Avg Energy</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avg('focus')}</div>
+                    <div class="stat-label">Avg Focus</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${avg('productivity')}</div>
+                    <div class="stat-label">Avg Productivity</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${entries.length}</div>
+                    <div class="stat-label">Total Entries</div>
+                </div>
+            `;
+
+            renderChart();
+        }
+
+        // Render chart
+        function renderChart() {
+            const ctx = document.getElementById('trend-chart');
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            // Get last 14 entries for the chart
+            const recentEntries = entries.slice(0, 14).reverse();
+
+            const labels = recentEntries.map(e => {
+                const date = new Date(e.timestamp);
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            });
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Mood',
+                            data: recentEntries.map(e => e.mood),
+                            borderColor: 'rgb(102, 126, 234)',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Energy',
+                            data: recentEntries.map(e => e.energy),
+                            borderColor: 'rgb(67, 233, 123)',
+                            backgroundColor: 'rgba(67, 233, 123, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Focus',
+                            data: recentEntries.map(e => e.focus),
+                            borderColor: 'rgb(240, 147, 251)',
+                            backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                            tension: 0.4
+                        },
+                        {
+                            label: 'Productivity',
+                            data: recentEntries.map(e => e.productivity),
+                            borderColor: 'rgb(250, 112, 154)',
+                            backgroundColor: 'rgba(250, 112, 154, 0.1)',
+                            tension: 0.4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        // Export data
+        function exportData() {
+            const dataStr = JSON.stringify(entries, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ema-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initial render
+        renderHistory();
+        renderInsights();
+    </script>
 </body>
 </html>
