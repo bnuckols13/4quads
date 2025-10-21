@@ -2,309 +2,141 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal EMA Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>EMA Tracker - Your Wellbeing Companion</title>
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
+
     <style>
+        :root {
+            --primary: #667eea;
+            --primary-dark: #5568d3;
+            --secondary: #764ba2;
+            --success: #43e97b;
+            --warning: #f093fb;
+            --danger: #f5576c;
+            --text: #2d3748;
+            --text-light: #718096;
+            --bg: #f7fafc;
+            --card: #ffffff;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.15);
+            --radius: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg);
             min-height: 100vh;
-            padding: 20px;
             line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .animated-bg.active {
+            opacity: 1;
+        }
+
+        .bg-orbs {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .orb-1 {
+            width: 300px;
+            height: 300px;
+            background: var(--primary);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 250px;
+            height: 250px;
+            background: var(--secondary);
+            bottom: -100px;
+            right: -100px;
+            animation-delay: 5s;
+        }
+
+        .orb-3 {
+            width: 200px;
+            height: 200px;
+            background: var(--success);
+            top: 50%;
+            right: 10%;
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
         }
 
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
+            padding: 20px;
+            padding-bottom: 100px;
         }
 
+        /* Header */
         .header {
             text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .card h2 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 1.5rem;
-        }
-
-        .metric-group {
-            margin-bottom: 25px;
-        }
-
-        .metric-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .metric-value {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-weight: bold;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .slider {
-            width: 100%;
-            height: 8px;
-            border-radius: 5px;
-            background: #e0e0e0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .scale-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        textarea {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-            min-height: 100px;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            transition: transform 0.2s, box-shadow 0.2s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
-            margin-top: 10px;
-        }
-
-        .btn-secondary:hover {
-            box-shadow: 0 6px 20px rgba(240, 147, 251, 0.6);
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 12px;
-            background: #f5f5f5;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .tab.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .entry {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border-left: 4px solid #667eea;
-        }
-
-        .entry-time {
-            color: #667eea;
-            font-weight: 600;
-            margin-bottom: 10px;
-            font-size: 0.95rem;
-        }
-
-        .entry-metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .entry-metric {
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .entry-metric-label {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .entry-metric-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .entry-notes {
-            color: #555;
-            font-style: italic;
-            margin-top: 10px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-        }
-
-        .chart-container {
+            padding: 40px 20px 30px;
             position: relative;
-            height: 300px;
-            margin-top: 20px;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .empty-state svg {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 20px;
-            opacity: 0.5;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.9;
-        }
-
-        .success-message {
-            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: 500;
-            animation: slideDown 0.3s ease;
+        .header-content {
+            animation: slideDown 0.6s ease;
         }
 
         @keyframes slideDown {
@@ -318,117 +150,875 @@
             }
         }
 
+        .app-logo {
+            font-size: 4rem;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        /* Streak Badge */
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .streak-badge .emoji {
+            font-size: 1.2rem;
+        }
+
+        /* Card */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            animation: fadeInUp 0.6s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            color: var(--text);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 8px;
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-light);
+            position: relative;
+            z-index: 1;
+        }
+
+        .tab.active {
+            color: white;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transform: scale(1.02);
+        }
+
+        .tab:not(.active):hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Metric Slider */
+        .metric-group {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-radius: 16px;
+            transition: var(--transition);
+        }
+
+        .metric-group:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            transform: scale(1.02);
+        }
+
+        .metric-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .metric-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .metric-emoji {
+            font-size: 1.5rem;
+            animation: wiggle 1s infinite;
+        }
+
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+
+        .metric-value {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            min-width: 50px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            transition: var(--transition);
+        }
+
+        .metric-value.changed {
+            animation: pop 0.3s ease;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .slider-container {
+            position: relative;
+            padding: 10px 0;
+        }
+
+        .slider {
+            width: 100%;
+            height: 12px;
+            border-radius: 10px;
+            background: linear-gradient(to right, #f5576c 0%, #f093fb 50%, #43e97b 100%);
+            outline: none;
+            -webkit-appearance: none;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            cursor: grab;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            border: 4px solid var(--primary);
+            transition: var(--transition);
+        }
+
+        .slider::-webkit-slider-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.2);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: white;
+            cursor: grab;
+            border: 4px solid var(--primary);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+
+        .slider::-moz-range-thumb:active {
+            cursor: grabbing;
+            transform: scale(1.2);
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 10px;
+            padding: 0 5px;
+        }
+
+        /* Textarea */
+        textarea {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 120px;
+            transition: var(--transition);
+            background: white;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(118, 75, 162, 0.02) 100%);
+        }
+
+        /* Buttons */
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 25px rgba(240, 147, 251, 0.6);
+        }
+
+        .btn-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Success Message */
+        .success-message {
+            background: linear-gradient(135deg, var(--success) 0%, #38f9d7 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            animation: slideDown 0.3s ease;
+            box-shadow: 0 4px 20px rgba(67, 233, 123, 0.4);
+        }
+
+        /* Entry Cards */
+        .entry {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border-left: 5px solid var(--primary);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .entry:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+        }
+
+        .entry-time {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .entry-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .entry-metric {
+            background: white;
+            padding: 14px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .entry-metric:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .entry-metric-label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .entry-metric-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .entry-notes {
+            color: var(--text);
+            font-style: italic;
+            margin-top: 12px;
+            padding: 14px;
+            background: white;
+            border-radius: 12px;
+            border-left: 3px solid var(--warning);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Chart */
+        .chart-container {
+            position: relative;
+            height: 350px;
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 30px;
+            color: var(--text-light);
+        }
+
+        .empty-state-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            animation: float 3s infinite ease-in-out;
+        }
+
+        .empty-state h3 {
+            color: var(--text);
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        /* Settings Panel */
+        .settings-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            border-radius: 16px;
+        }
+
+        .settings-group h3 {
+            color: var(--text);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .setting-description {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-top: 4px;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 60px;
+            height: 32px;
+            background: #cbd5e0;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .toggle.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        .toggle-thumb {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle.active .toggle-thumb {
+            left: 32px;
+        }
+
+        /* Input Field */
+        .input-field {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Install Banner */
+        .install-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .install-banner.show {
+            display: flex;
+        }
+
+        .install-icon {
+            font-size: 2rem;
+        }
+
+        .install-content {
+            flex: 1;
+        }
+
+        .install-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .install-description {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .install-btn {
+            background: white;
+            color: var(--primary);
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .install-close {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .install-close:hover {
+            opacity: 1;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Notification Badge */
+        .notification-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--warning) 0%, var(--danger) 100%);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(240, 147, 251, 0.4);
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideDown 0.5s ease;
+            cursor: pointer;
+        }
+
+        /* Responsive */
         @media (max-width: 600px) {
             .header h1 {
-                font-size: 2rem;
+                font-size: 1.6rem;
             }
 
             .card {
-                padding: 20px;
+                padding: 24px 20px;
             }
 
             .tabs {
+                gap: 6px;
+            }
+
+            .tab {
+                padding: 12px 16px;
+                font-size: 0.85rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .install-banner {
                 flex-direction: column;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
+    <div class="bg-orbs">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1>📊 Personal EMA Tracker</h1>
-            <p>Track your mental health and productivity</p>
+            <div class="header-content">
+                <div class="app-logo">📊</div>
+                <h1>EMA Tracker</h1>
+                <p>Your personal wellbeing companion</p>
+                <div class="streak-badge" id="streak-badge">
+                    <span class="emoji">🔥</span>
+                    <span id="streak-days">0</span> day streak
+                </div>
+            </div>
         </div>
 
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('log')">Log Entry</button>
-            <button class="tab" onclick="switchTab('history')">History</button>
-            <button class="tab" onclick="switchTab('insights')">Insights</button>
+            <button class="tab active" onclick="switchTab('log')">
+                <span class="btn-icon">📝 Log</span>
+            </button>
+            <button class="tab" onclick="switchTab('history')">
+                <span class="btn-icon">📜 History</span>
+            </button>
+            <button class="tab" onclick="switchTab('insights')">
+                <span class="btn-icon">📈 Insights</span>
+            </button>
+            <button class="tab" onclick="switchTab('settings')">
+                <span class="btn-icon">⚙️ Settings</span>
+            </button>
         </div>
 
         <!-- LOG ENTRY TAB -->
         <div id="log-tab" class="tab-content active">
             <div class="card">
-                <h2>How are you feeling right now?</h2>
-
                 <div id="success-message" style="display: none;" class="success-message">
-                    Entry saved successfully!
+                    ✨ Entry saved successfully!
                 </div>
 
                 <form id="ema-form">
                     <div class="metric-group">
                         <div class="metric-label">
-                            <span>😊 Mood</span>
+                            <span class="metric-name">
+                                <span class="metric-emoji">😊</span>
+                                Mood
+                            </span>
                             <span class="metric-value" id="mood-value">5</span>
                         </div>
-                        <input type="range" class="slider" id="mood" min="1" max="10" value="5">
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="mood" min="1" max="10" value="5">
+                        </div>
                         <div class="scale-labels">
-                            <span>Very Low</span>
-                            <span>Neutral</span>
-                            <span>Very High</span>
+                            <span>😔 Low</span>
+                            <span>😐 Neutral</span>
+                            <span>😄 High</span>
                         </div>
                     </div>
 
                     <div class="metric-group">
                         <div class="metric-label">
-                            <span>😰 Anxiety</span>
+                            <span class="metric-name">
+                                <span class="metric-emoji">😰</span>
+                                Anxiety
+                            </span>
                             <span class="metric-value" id="anxiety-value">5</span>
                         </div>
-                        <input type="range" class="slider" id="anxiety" min="1" max="10" value="5">
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="anxiety" min="1" max="10" value="5">
+                        </div>
                         <div class="scale-labels">
-                            <span>Very Calm</span>
-                            <span>Moderate</span>
-                            <span>Very Anxious</span>
+                            <span>😌 Calm</span>
+                            <span>😟 Moderate</span>
+                            <span>😱 High</span>
                         </div>
                     </div>
 
                     <div class="metric-group">
                         <div class="metric-label">
-                            <span>⚡ Energy</span>
+                            <span class="metric-name">
+                                <span class="metric-emoji">⚡</span>
+                                Energy
+                            </span>
                             <span class="metric-value" id="energy-value">5</span>
                         </div>
-                        <input type="range" class="slider" id="energy" min="1" max="10" value="5">
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="energy" min="1" max="10" value="5">
+                        </div>
                         <div class="scale-labels">
-                            <span>Exhausted</span>
-                            <span>Moderate</span>
-                            <span>Energized</span>
+                            <span>😴 Tired</span>
+                            <span>🙂 Okay</span>
+                            <span>⚡ Energized</span>
                         </div>
                     </div>
 
                     <div class="metric-group">
                         <div class="metric-label">
-                            <span>🎯 Focus</span>
+                            <span class="metric-name">
+                                <span class="metric-emoji">🎯</span>
+                                Focus
+                            </span>
                             <span class="metric-value" id="focus-value">5</span>
                         </div>
-                        <input type="range" class="slider" id="focus" min="1" max="10" value="5">
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="focus" min="1" max="10" value="5">
+                        </div>
                         <div class="scale-labels">
-                            <span>Scattered</span>
-                            <span>Moderate</span>
-                            <span>Laser-Focused</span>
+                            <span>😵 Scattered</span>
+                            <span>🤔 Moderate</span>
+                            <span>🎯 Focused</span>
                         </div>
                     </div>
 
                     <div class="metric-group">
                         <div class="metric-label">
-                            <span>💼 Productivity</span>
+                            <span class="metric-name">
+                                <span class="metric-emoji">💼</span>
+                                Productivity
+                            </span>
                             <span class="metric-value" id="productivity-value">5</span>
                         </div>
-                        <input type="range" class="slider" id="productivity" min="1" max="10" value="5">
+                        <div class="slider-container">
+                            <input type="range" class="slider" id="productivity" min="1" max="10" value="5">
+                        </div>
                         <div class="scale-labels">
-                            <span>Not Productive</span>
-                            <span>Moderate</span>
-                            <span>Very Productive</span>
+                            <span>😓 Low</span>
+                            <span>👍 Okay</span>
+                            <span>🚀 High</span>
                         </div>
                     </div>
 
                     <div class="metric-group">
                         <label class="metric-label">
-                            <span>📝 Notes (optional)</span>
+                            <span class="metric-name">
+                                <span class="metric-emoji">📝</span>
+                                Notes
+                            </span>
                         </label>
-                        <textarea id="notes" placeholder="Any thoughts, context, or observations..."></textarea>
+                        <textarea id="notes" placeholder="How are you feeling? What's on your mind? (optional)"></textarea>
                     </div>
 
-                    <button type="submit" class="btn">Save Entry</button>
+                    <button type="submit" class="btn">
+                        <span class="btn-icon">✨ Save Entry</span>
+                    </button>
                 </form>
             </div>
         </div>
@@ -436,7 +1026,9 @@
         <!-- HISTORY TAB -->
         <div id="history-tab" class="tab-content">
             <div class="card">
-                <h2>Your History</h2>
+                <div class="card-header">
+                    <h2>Your History</h2>
+                </div>
                 <div id="entries-container"></div>
             </div>
         </div>
@@ -444,29 +1036,356 @@
         <!-- INSIGHTS TAB -->
         <div id="insights-tab" class="tab-content">
             <div class="card">
-                <h2>Your Insights</h2>
+                <div class="card-header">
+                    <h2>Your Insights</h2>
+                </div>
                 <div id="stats-container" class="stats-grid"></div>
                 <div class="chart-container">
                     <canvas id="trend-chart"></canvas>
                 </div>
-                <button class="btn btn-secondary" onclick="exportData()">📥 Export All Data</button>
+                <button class="btn btn-secondary" onclick="exportData()">
+                    <span class="btn-icon">📥 Export All Data</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="settings-tab" class="tab-content">
+            <div class="card">
+                <h2>Settings</h2>
+
+                <div class="settings-group">
+                    <h3>🔔 Notifications</h3>
+
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Enable Notifications</div>
+                            <div class="setting-description">Get reminded to log your entries</div>
+                        </div>
+                        <div class="toggle" id="notifications-toggle" onclick="toggleNotifications()">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Daily Reminders</div>
+                            <div class="setting-description">How many times per day?</div>
+                        </div>
+                        <input type="number" class="input-field" id="reminder-count" value="3" min="1" max="10" style="width: 80px;">
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>📱 SMS Notifications (Optional)</h3>
+
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Enable SMS</div>
+                            <div class="setting-description">Receive text message reminders</div>
+                        </div>
+                        <div class="toggle" id="sms-toggle" onclick="toggleSMS()">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <div style="width: 100%;">
+                            <div class="setting-label">Your Phone Number</div>
+                            <input type="tel" class="input-field" id="phone-number" placeholder="+1234567890">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-group">
+                    <h3>🔒 Data & Privacy</h3>
+
+                    <div class="setting-item">
+                        <div>
+                            <div class="setting-label">Cloud Sync</div>
+                            <div class="setting-description">Save data to Firebase (requires setup)</div>
+                        </div>
+                        <div class="toggle" id="cloud-toggle" onclick="toggleCloud()">
+                            <div class="toggle-thumb"></div>
+                        </div>
+                    </div>
+
+                    <div class="setting-item">
+                        <button class="btn btn-secondary" onclick="clearAllData()">
+                            <span class="btn-icon">🗑️ Clear All Data</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="saveSettings()">
+                    <span class="btn-icon">💾 Save Settings</span>
+                </button>
             </div>
         </div>
     </div>
 
+    <!-- Install Banner -->
+    <div class="install-banner" id="install-banner">
+        <div class="install-icon">📱</div>
+        <div class="install-content">
+            <div class="install-title">Install EMA Tracker</div>
+            <div class="install-description">Add to your home screen for the best experience!</div>
+        </div>
+        <button class="install-btn" id="install-button">Install</button>
+        <button class="install-close" onclick="closeInstallBanner()">×</button>
+    </div>
+
+    <script src="firebase-config.js"></script>
     <script>
-        // Initialize app
-        let entries = JSON.parse(localStorage.getItem('emaEntries') || '[]');
+        // App State
+        let entries = [];
+        let settings = {
+            notifications: false,
+            sms: false,
+            cloudSync: false,
+            reminderCount: 3,
+            phoneNumber: ''
+        };
         let chart = null;
+        let deferredPrompt = null;
+        let db = null;
 
-        // Update slider values in real-time
-        document.querySelectorAll('.slider').forEach(slider => {
-            slider.addEventListener('input', (e) => {
-                document.getElementById(`${e.target.id}-value`).textContent = e.target.value;
+        // Initialize App
+        function initApp() {
+            loadData();
+            loadSettings();
+            initServiceWorker();
+            initFirebase();
+            updateStreak();
+            setupSliders();
+            renderHistory();
+            renderInsights();
+            checkInstallPrompt();
+        }
+
+        // Service Worker
+        function initServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('Service Worker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
+        }
+
+        // Firebase Initialization
+        function initFirebase() {
+            try {
+                if (typeof firebaseConfig !== 'undefined' && firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY_HERE') {
+                    firebase.initializeApp(firebaseConfig);
+                    db = firebase.firestore();
+                    console.log('Firebase initialized');
+                }
+            } catch (error) {
+                console.log('Firebase not configured:', error);
+            }
+        }
+
+        // Load data from localStorage or Firebase
+        function loadData() {
+            const localData = localStorage.getItem('emaEntries');
+            if (localData) {
+                entries = JSON.parse(localData);
+            }
+
+            // TODO: Sync with Firebase if enabled
+            if (settings.cloudSync && db) {
+                syncWithFirebase();
+            }
+        }
+
+        // Save data
+        function saveData() {
+            localStorage.setItem('emaEntries', JSON.stringify(entries));
+
+            if (settings.cloudSync && db) {
+                syncWithFirebase();
+            }
+        }
+
+        // Sync with Firebase
+        async function syncWithFirebase() {
+            if (!db) return;
+
+            try {
+                const userId = 'user-' + (localStorage.getItem('userId') || Date.now());
+                localStorage.setItem('userId', userId);
+
+                for (const entry of entries) {
+                    if (!entry.synced) {
+                        await db.collection('entries').add({
+                            userId: userId,
+                            ...entry,
+                            syncedAt: new Date()
+                        });
+                        entry.synced = true;
+                    }
+                }
+                saveData();
+            } catch (error) {
+                console.error('Firebase sync error:', error);
+            }
+        }
+
+        // Load settings
+        function loadSettings() {
+            const savedSettings = localStorage.getItem('emaSettings');
+            if (savedSettings) {
+                settings = JSON.parse(savedSettings);
+                applySettings();
+            }
+        }
+
+        // Apply settings to UI
+        function applySettings() {
+            document.getElementById('notifications-toggle').classList.toggle('active', settings.notifications);
+            document.getElementById('sms-toggle').classList.toggle('active', settings.sms);
+            document.getElementById('cloud-toggle').classList.toggle('active', settings.cloudSync);
+            document.getElementById('reminder-count').value = settings.reminderCount;
+            document.getElementById('phone-number').value = settings.phoneNumber;
+        }
+
+        // Save settings
+        function saveSettings() {
+            settings.reminderCount = parseInt(document.getElementById('reminder-count').value);
+            settings.phoneNumber = document.getElementById('phone-number').value;
+
+            localStorage.setItem('emaSettings', JSON.stringify(settings));
+
+            showNotification('✅ Settings saved successfully!');
+
+            if (settings.notifications) {
+                scheduleNotifications();
+            }
+        }
+
+        // Toggle functions
+        function toggleNotifications() {
+            const toggle = document.getElementById('notifications-toggle');
+            settings.notifications = !settings.notifications;
+            toggle.classList.toggle('active');
+
+            if (settings.notifications) {
+                requestNotificationPermission();
+            }
+        }
+
+        function toggleSMS() {
+            const toggle = document.getElementById('sms-toggle');
+            settings.sms = !settings.sms;
+            toggle.classList.toggle('active');
+        }
+
+        function toggleCloud() {
+            const toggle = document.getElementById('cloud-toggle');
+            settings.cloudSync = !settings.cloudSync;
+            toggle.classList.toggle('active');
+
+            if (settings.cloudSync && !db) {
+                showNotification('⚠️ Please configure Firebase first!');
+                settings.cloudSync = false;
+                toggle.classList.remove('active');
+            }
+        }
+
+        // Request notification permission
+        async function requestNotificationPermission() {
+            if ('Notification' in window) {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    showNotification('🔔 Notifications enabled!');
+                    scheduleNotifications();
+                } else {
+                    showNotification('❌ Notification permission denied');
+                    settings.notifications = false;
+                    document.getElementById('notifications-toggle').classList.remove('active');
+                }
+            }
+        }
+
+        // Schedule notifications
+        function scheduleNotifications() {
+            // Clear existing reminders
+            const existingReminders = JSON.parse(localStorage.getItem('scheduledReminders') || '[]');
+            existingReminders.forEach(id => clearTimeout(id));
+
+            const reminders = [];
+            const count = settings.reminderCount;
+            const wakeHour = 8; // 8 AM
+            const sleepHour = 22; // 10 PM
+            const activeHours = sleepHour - wakeHour;
+            const interval = (activeHours * 60) / count; // minutes
+
+            for (let i = 0; i < count; i++) {
+                const minutesFromWake = interval * i;
+                const hour = wakeHour + Math.floor(minutesFromWake / 60);
+                const minute = Math.floor(minutesFromWake % 60);
+
+                const now = new Date();
+                const scheduledTime = new Date();
+                scheduledTime.setHours(hour, minute, 0, 0);
+
+                if (scheduledTime < now) {
+                    scheduledTime.setDate(scheduledTime.getDate() + 1);
+                }
+
+                const delay = scheduledTime - now;
+                const timerId = setTimeout(() => {
+                    showPushNotification();
+                }, delay);
+
+                reminders.push(timerId);
+            }
+
+            localStorage.setItem('scheduledReminders', JSON.stringify(reminders));
+        }
+
+        // Show push notification
+        function showPushNotification() {
+            if ('serviceWorker' in navigator && 'Notification' in window && Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification('EMA Check-in Time! 📊', {
+                        body: 'Time to log how you\'re feeling! 😊',
+                        icon: '/icon-192.png',
+                        badge: '/icon-192.png',
+                        vibrate: [200, 100, 200],
+                        tag: 'ema-reminder',
+                        requireInteraction: true,
+                        actions: [
+                            { action: 'log-now', title: 'Log Now' },
+                            { action: 'snooze', title: 'Remind Later' }
+                        ]
+                    });
+                });
+            }
+        }
+
+        // Setup sliders
+        function setupSliders() {
+            document.querySelectorAll('.slider').forEach(slider => {
+                slider.addEventListener('input', (e) => {
+                    const valueEl = document.getElementById(`${e.target.id}-value`);
+                    valueEl.textContent = e.target.value;
+                    valueEl.classList.add('changed');
+                    setTimeout(() => valueEl.classList.remove('changed'), 300);
+
+                    // Haptic feedback for mobile
+                    if ('vibrate' in navigator) {
+                        navigator.vibrate(10);
+                    }
+                });
             });
-        });
+        }
 
-        // Handle form submission
+        // Form submission
         document.getElementById('ema-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -477,13 +1396,16 @@
                 energy: parseInt(document.getElementById('energy').value),
                 focus: parseInt(document.getElementById('focus').value),
                 productivity: parseInt(document.getElementById('productivity').value),
-                notes: document.getElementById('notes').value.trim()
+                notes: document.getElementById('notes').value.trim(),
+                synced: false
             };
 
             entries.unshift(entry);
-            localStorage.setItem('emaEntries', JSON.stringify(entries));
+            saveData();
 
-            // Show success message
+            // Show success with confetti!
+            celebrate();
+
             const successMsg = document.getElementById('success-message');
             successMsg.style.display = 'block';
             setTimeout(() => {
@@ -496,17 +1418,58 @@
                 el.textContent = '5';
             });
 
-            // Update other tabs
+            updateStreak();
             renderHistory();
             renderInsights();
         });
+
+        // Celebrate with confetti
+        function celebrate() {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+
+            if ('vibrate' in navigator) {
+                navigator.vibrate([100, 50, 100]);
+            }
+        }
+
+        // Update streak
+        function updateStreak() {
+            const streak = calculateStreak();
+            document.getElementById('streak-days').textContent = streak;
+        }
+
+        // Calculate streak
+        function calculateStreak() {
+            if (entries.length === 0) return 0;
+
+            let streak = 1;
+            const today = new Date().setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < entries.length - 1; i++) {
+                const currentDate = new Date(entries[i].timestamp).setHours(0, 0, 0, 0);
+                const nextDate = new Date(entries[i + 1].timestamp).setHours(0, 0, 0, 0);
+                const diffDays = (currentDate - nextDate) / (1000 * 60 * 60 * 24);
+
+                if (diffDays === 1) {
+                    streak++;
+                } else if (diffDays > 1) {
+                    break;
+                }
+            }
+
+            return streak;
+        }
 
         // Tab switching
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
 
-            event.target.classList.add('active');
+            event.target.closest('.tab').classList.add('active');
             document.getElementById(`${tab}-tab`).classList.add('active');
 
             if (tab === 'history') renderHistory();
@@ -520,10 +1483,9 @@
             if (entries.length === 0) {
                 container.innerHTML = `
                     <div class="empty-state">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                        <p>No entries yet. Start logging your first entry!</p>
+                        <div class="empty-state-icon">📝</div>
+                        <h3>No entries yet</h3>
+                        <p>Start logging your first entry to see your history!</p>
                     </div>
                 `;
                 return;
@@ -542,7 +1504,7 @@
 
                 return `
                     <div class="entry">
-                        <div class="entry-time">${formatted}</div>
+                        <div class="entry-time">🕐 ${formatted}</div>
                         <div class="entry-metrics">
                             <div class="entry-metric">
                                 <div class="entry-metric-label">Mood</div>
@@ -565,7 +1527,7 @@
                                 <div class="entry-metric-value">${entry.productivity}</div>
                             </div>
                         </div>
-                        ${entry.notes ? `<div class="entry-notes">"${entry.notes}"</div>` : ''}
+                        ${entry.notes ? `<div class="entry-notes">💭 "${entry.notes}"</div>` : ''}
                     </div>
                 `;
             }).join('');
@@ -577,17 +1539,15 @@
 
             if (entries.length === 0) {
                 statsContainer.innerHTML = `
-                    <div class="empty-state">
-                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
-                        <p>No data to analyze yet. Start logging entries!</p>
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <div class="empty-state-icon">📊</div>
+                        <h3>No data yet</h3>
+                        <p>Log some entries to see your insights!</p>
                     </div>
                 `;
                 return;
             }
 
-            // Calculate averages
             const avg = (metric) => {
                 const sum = entries.reduce((acc, e) => acc + e[metric], 0);
                 return (sum / entries.length).toFixed(1);
@@ -596,27 +1556,27 @@
             statsContainer.innerHTML = `
                 <div class="stat-card">
                     <div class="stat-value">${avg('mood')}</div>
-                    <div class="stat-label">Avg Mood</div>
+                    <div class="stat-label">😊 Avg Mood</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${avg('anxiety')}</div>
-                    <div class="stat-label">Avg Anxiety</div>
+                    <div class="stat-label">😰 Avg Anxiety</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${avg('energy')}</div>
-                    <div class="stat-label">Avg Energy</div>
+                    <div class="stat-label">⚡ Avg Energy</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${avg('focus')}</div>
-                    <div class="stat-label">Avg Focus</div>
+                    <div class="stat-label">🎯 Avg Focus</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${avg('productivity')}</div>
-                    <div class="stat-label">Avg Productivity</div>
+                    <div class="stat-label">💼 Avg Productivity</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-value">${entries.length}</div>
-                    <div class="stat-label">Total Entries</div>
+                    <div class="stat-label">📝 Total Entries</div>
                 </div>
             `;
 
@@ -631,7 +1591,6 @@
                 chart.destroy();
             }
 
-            // Get last 14 entries for the chart
             const recentEntries = entries.slice(0, 14).reverse();
 
             const labels = recentEntries.map(e => {
@@ -647,30 +1606,34 @@
                         {
                             label: 'Mood',
                             data: recentEntries.map(e => e.mood),
-                            borderColor: 'rgb(102, 126, 234)',
+                            borderColor: '#667eea',
                             backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            borderWidth: 3
                         },
                         {
                             label: 'Energy',
                             data: recentEntries.map(e => e.energy),
-                            borderColor: 'rgb(67, 233, 123)',
+                            borderColor: '#43e97b',
                             backgroundColor: 'rgba(67, 233, 123, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            borderWidth: 3
                         },
                         {
                             label: 'Focus',
                             data: recentEntries.map(e => e.focus),
-                            borderColor: 'rgb(240, 147, 251)',
+                            borderColor: '#f093fb',
                             backgroundColor: 'rgba(240, 147, 251, 0.1)',
-                            tension: 0.4
+                            tension: 0.4,
+                            borderWidth: 3
                         },
                         {
                             label: 'Productivity',
                             data: recentEntries.map(e => e.productivity),
-                            borderColor: 'rgb(250, 112, 154)',
-                            backgroundColor: 'rgba(250, 112, 154, 0.1)',
-                            tension: 0.4
+                            borderColor: '#f5576c',
+                            backgroundColor: 'rgba(245, 87, 108, 0.1)',
+                            tension: 0.4,
+                            borderWidth: 3
                         }
                     ]
                 },
@@ -680,12 +1643,38 @@
                     plugins: {
                         legend: {
                             position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: {
+                                    size: 12,
+                                    weight: '600'
+                                }
+                            }
                         }
                     },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            max: 10
+                            max: 10,
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 11
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
                         }
                     }
                 }
@@ -702,11 +1691,65 @@
             link.download = `ema-data-${new Date().toISOString().split('T')[0]}.json`;
             link.click();
             URL.revokeObjectURL(url);
+
+            showNotification('📥 Data exported successfully!');
         }
 
-        // Initial render
-        renderHistory();
-        renderInsights();
+        // Clear all data
+        function clearAllData() {
+            if (confirm('Are you sure you want to delete all your data? This cannot be undone!')) {
+                entries = [];
+                saveData();
+                renderHistory();
+                renderInsights();
+                updateStreak();
+                showNotification('🗑️ All data cleared');
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            const banner = document.createElement('div');
+            banner.className = 'notification-badge';
+            banner.textContent = message;
+            document.body.appendChild(banner);
+
+            setTimeout(() => {
+                banner.remove();
+            }, 3000);
+        }
+
+        // PWA Install prompt
+        function checkInstallPrompt() {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+
+                const installBanner = document.getElementById('install-banner');
+                installBanner.classList.add('show');
+
+                document.getElementById('install-button').addEventListener('click', async () => {
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        const { outcome } = await deferredPrompt.userChoice;
+
+                        if (outcome === 'accepted') {
+                            showNotification('🎉 App installed successfully!');
+                        }
+
+                        deferredPrompt = null;
+                        installBanner.classList.remove('show');
+                    }
+                });
+            });
+        }
+
+        function closeInstallBanner() {
+            document.getElementById('install-banner').classList.remove('show');
+        }
+
+        // Initialize on load
+        window.addEventListener('load', initApp);
     </script>
 </body>
 </html>
